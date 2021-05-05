@@ -1,42 +1,82 @@
-import React, { useEffect, useState } from "react";
-import ColorfulMessage from "./components/ColorfulMessage";
+import React, { useState } from "react";
+import "./styles.css";
 
-const App = () => {
-  console.log("さいしょ");
-  const [num, setNum] = useState(0);
-  const [faceShowFlag, setFaceShowFlag] = useState(false);
+export const App = () => {
+  const [todoText, setTodoText] = useState("");
+  const [incompleteTodos, setIncompleteTodos] = useState([]);
+  const [completeTodos, setCompleteTodos] = useState([]);
+  const onChangeTodoText = (event) => setTodoText(event.target.value);
 
-  const onClickButton = () => {
-    setNum(num + 1);
+  const onClickAdd = () => {
+    if (todoText === "") return;
+    const newTodos = [...incompleteTodos, todoText];
+    setIncompleteTodos(newTodos);
+    setTodoText("");
   };
 
-  const onClickSwitchShowFlag = () => {
-    setFaceShowFlag(!faceShowFlag);
+  const onClickDelete = (index) => {
+    const newTodos = [...incompleteTodos];
+    newTodos.splice(index, 1);
+    setIncompleteTodos(newTodos);
   };
 
-  useEffect(() => {
-    if (num > 0) {
-      if (num % 3 === 0) {
-        faceShowFlag || setFaceShowFlag(true);
-      } else {
-        faceShowFlag && setFaceShowFlag(false);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [num]);
+  const onClickComplete = (index) => {
+    const newIncompleteTodos = [...incompleteTodos];
+    newIncompleteTodos.splice(index, 1);
+    const newCompleteTodos = [...completeTodos, incompleteTodos[index]];
+    setIncompleteTodos(newIncompleteTodos);
+    setCompleteTodos(newCompleteTodos);
+  };
+
+  const onClickBack = (index) => {
+    const newIncompleteTodos = [...incompleteTodos, completeTodos[index]];
+    const newCompleteTodos = [...completeTodos];
+    newCompleteTodos.splice(index, 1);
+    setIncompleteTodos(newIncompleteTodos);
+    setCompleteTodos(newCompleteTodos);
+  };
 
   return (
     <>
-      <h1 style={{ color: "red" }}>こんにちは！</h1>
-      <ColorfulMessage color="blue">お元気ですか？</ColorfulMessage>
-      <ColorfulMessage color="pink">元気です！</ColorfulMessage>
-      <button onClick={onClickButton}>カウントアップ</button>
-      <br />
-      <button onClick={onClickSwitchShowFlag}>on/off</button>
-      <p>{num}</p>
-      {faceShowFlag && <p>(*´꒳`*)</p>}
+      <div className="input-area">
+        <input
+          placeholder="TODOを入力"
+          value={todoText}
+          onChange={onChangeTodoText}
+        />
+        <button onClick={onClickAdd}>追加</button>
+      </div>
+      <div className="incomplete-area">
+        <p className="title">未完了のTODO</p>
+        <ul>
+          {incompleteTodos.map((todo, index) => {
+            return (
+              <li key={todo}>
+                <div className="list-row">
+                  <p>{todo}</p>
+                  <button onClick={() => onClickComplete(index)}>完了</button>
+                  <button onClick={() => onClickDelete(index)}>削除</button>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+      <div className="complete-area">
+        <p className="title">完了したTODO</p>
+        <ul>
+          {completeTodos.map((todo, index) => {
+            return (
+              <li key={todo}>
+                <div className="list-row">
+                  <p>{todo}</p>
+                  <button onClick={() => onClickBack(index)}>戻す</button>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
     </>
   );
 };
-
-export default App;
